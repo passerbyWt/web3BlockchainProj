@@ -5,9 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 // contract inspired from https://github.com/pancakeswap/lottery-contract/tree/master/contracts
+// TO DO: Think about which test blockchain to load our data on so we can acutally use some of 
+// the package such as the CRF for randomness
 
-
-interface RandomNumGenerator {
+interface IRandomNumGenerator {
     /**
      * Requests randomness from a user-provided seed
      */
@@ -21,7 +22,24 @@ interface RandomNumGenerator {
     /**
      * Views random result
      */
-    function viewRandomResult() external view returns (uint32);
+    function viewRandomResult() external view returns (uint256);
+}
+
+// this fumction is pointless but will be switched out later
+contract RandomNumGenerator is IRandomNumGenerator{
+    uint256 randomResult;
+
+    function getRandomNumber(uint256 _seed) external override {
+        randomResult = _seed;
+    }
+
+    function viewLatestLotteryId() external view override returns (uint256) {
+        return randomResult;
+    }
+
+    function viewRandomResult() external view override returns (uint256){
+        return randomResult;
+    }
 }
 
 contract CovidLotteryTracker {
@@ -30,7 +48,8 @@ contract CovidLotteryTracker {
     enum Status {
         Pending, 
         Open, 
-        Close
+        Close,
+        Claimable
     }
     
     struct responder {
@@ -44,13 +63,14 @@ contract CovidLotteryTracker {
         uint256 startTime;
         uint256 endTime;
         address[]lotteryPool;
+        uint256 winnerNumber;
     }
 
     IERC20 public lottoToken;
     RandomNumGenerator public randomGen;
+    address[] lotteryPool;
     mapping(uint256 => Lottery) private _lotteries;
     uint256 public currentLotteryId;
-    address[] private lotteryPool;
 
     mapping(address => responder) public responses;
 
@@ -72,15 +92,9 @@ contract CovidLotteryTracker {
 
     );
 
-
-    // constructor if we have CRF random number generator 
-    // constructor(address _lottoTokenAddress, address _randomGeneratorAddress) {
-    //     lottoToken = IERC20(_lottoTokenAddress);
-    //     randomGen  = RandomNumGenerator(_randomGeneratorAddress);
-    // }
-
-    constructor(address _lottoTokenAddress) {
+    constructor(address _lottoTokenAddress, address _randomGeneratorAddress) {
         lottoToken = IERC20(_lottoTokenAddress);
+        randomGen  = RandomNumGenerator(_randomGeneratorAddress);
     }
     
     // need to take care of other conditions, maybe different way to enter 
@@ -108,6 +122,7 @@ contract CovidLotteryTracker {
         
         require(_treasuryFee <= MAX_TREASURY_FEE, "Treasury fee too high.");
         
+        
         currentLotteryId++;
 
         _lotteries[currentLotteryId] = Lottery({
@@ -115,7 +130,9 @@ contract CovidLotteryTracker {
             startingLotteryAmt: _startingLotteryAmt,
             startTime: block.timestamp,
             endTime: _endTime, 
-            lotteryPool: lotteryPool
+            lotteryPool: lotteryPool,
+            winnerNumber: 0
+
         });
 
         emit LotteryOpen(currentLotteryId, block.timestamp, _endTime, _startingLotteryAmt);
@@ -125,7 +142,7 @@ contract CovidLotteryTracker {
         require(_lotteries[_lotteryId].status == Status.Open, "Lottery not open");
         require(block.timestamp > _lotteries[_lotteryId].endTime, "Lotter not over");
         
-        // randomGenerator.getRandomNumber();
+        randomGen.getRandomNumber(random(_lotteryId));
         _lotteries[_lotteryId].status = Status.Close;
 
         emit LotteryClose(_lotteryId);
@@ -143,10 +160,17 @@ contract CovidLotteryTracker {
 
 
 
-    // function drawAddressAndMakeLotteryClaimable(uint256 _lotteryId) external {
-    //     require(_lotteries[_lotteryId].status == Status.Close, "Lottery not close");
+    function drawAddressAndMakeLotteryClaimable(uint256 _lotteryId) external {
+        require(_lotteries[_lotteryId].status == Status.Close, "Lottery not close");
 
-    // }
+        uint256 winnerNumber = randomGen.viewRandomResult() % _lotteries[_lotteryId].lotteryPool.length;
+
+        // TO DO: need to add here how to handle the funds, currently we can just test the lottery
+
+        // update the lottery info 
+        _lotteries[_lotteryId].winnerNumber = winnerNumber;
+        _lotteries[_lotteryId].status = Status.Claimable;
+    }
 
     // function viewCurrentLotteryId() external view override return (uint256) {
     //     return currentLotteryId;
