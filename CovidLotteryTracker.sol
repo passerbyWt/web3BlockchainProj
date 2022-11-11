@@ -172,6 +172,8 @@ contract CovidLotteryTracker {
         _lotteries[_lotteryId].status = Status.Claimable;
     }
 
+    function claimRe
+
     // function viewCurrentLotteryId() external view override return (uint256) {
     //     return currentLotteryId;
     // }
