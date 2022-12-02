@@ -18,7 +18,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // We need to create contract that can create other contracts, so users can define create their own survery to collect data 
 // https://medium.com/upstate-interactive/creating-a-contract-with-a-smart-contract-bdb67c5c8595
 
-//
+// add safemath methods
+
+
 
 
 interface IRandomNumGenerator {
