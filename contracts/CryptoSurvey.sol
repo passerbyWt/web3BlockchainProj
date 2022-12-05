@@ -10,10 +10,11 @@ contract CryptoSurvey is Ownable{
     using SafeERC20 for IERC20;
     IERC20 public cskToken;
     
-
+    
     
 
     struct Survey {
+        string name;
         bool isActive;
         uint256 reward;
         bool isLotto;
@@ -46,10 +47,11 @@ contract CryptoSurvey is Ownable{
         return _surveys[id];
     }
 
-    function createSurvey(bool pIsLotto, uint256 pReward) public returns (uint256){
+    function createSurvey(string memory pName,bool pIsLotto, uint256 pReward) public returns (uint256){
         countSurveys++;
 
         _surveys[countSurveys] = Survey({
+            name: pName,
             isActive: true,
             reward: pReward,
             isLotto: pIsLotto,
@@ -64,6 +66,9 @@ contract CryptoSurvey is Ownable{
         uint256 uId=_surveys[surveyId].userCount;
         _users[surveyId][uId]=reporter;
 
+
+        cskToken.safeIncreaseAllowance(reporter, _surveys[surveyId].reward);
+
        
     }
 
@@ -74,13 +79,15 @@ contract CryptoSurvey is Ownable{
                 uint256 uId=random(_surveys[surveyId].userCount)+1;
                 address userAddress=_users[surveyId][uId];
                 uint256 amount=_surveys[surveyId].reward;
-                cskToken.safeTransferFrom(address(this), userAddress, amount);
+                
+                cskToken.transfer(userAddress, amount);
 
             }else{
                 uint256 amount=uint256(_surveys[surveyId].reward/_surveys[surveyId].userCount);
                 for (uint i = 1; i <= _surveys[surveyId].userCount; i++) {
                     address userAddress=_users[surveyId][i];
-                    cskToken.safeTransferFrom(address(this), userAddress, amount);
+                    
+                    cskToken.transfer(userAddress, amount);
                 }
 
             }
