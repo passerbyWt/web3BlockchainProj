@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
     <link rel="stylesheet" href="assets/css/Sidebar-Menu-sidebar.css">
     <link rel="stylesheet" href="assets/css/Sidebar-Menu.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="assets/js/bower_components/abi-decoder/dist/abi-decoder.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 </head>
 
 <body>
@@ -52,7 +55,7 @@
                     <div class="card shadow-sm">
                         <div class="card-body px-4 py-5 px-md-5">
                             <div class="bs-icon-lg d-flex justify-content-center align-items-center mb-3 bs-icon" style="top: 1rem;right: 1rem;position: absolute;"></div>
-                            <h5 class="fw-bold card-title">Total CSX Earning: <span style="color: rgb(55, 234, 11);">146.06</span></h5>
+                            <h5 class="fw-bold card-title">Total CSX Tokens: <span style="color: rgb(55, 234, 11);">146.06</span></h5>
                         </div>
                     </div>
                 </div>
@@ -71,7 +74,7 @@
                                     <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"></path>
                                 </svg></div>
                             <h5 class="fw-bold card-title">Create your survey</h5>
-                            <p class="text-muted card-text mb-4">We offer a variety of surveys with multiple ways to incentivize participants to complete your survey.&nbsp;&nbsp;<br><br></p><button class="btn btn-primary shadow" type="button">Get started</button>
+                            <p class="text-muted card-text mb-4">We offer a variety of surveys with multiple ways to incentivize participants to complete your survey.&nbsp;&nbsp;<br><br></p><button class="btn btn-primary shadow" type="button" data-bs-target="#create-survey-modal" data-bs-toggle="modal">Get started</button>
                         </div>
                     </div>
                 </div>
@@ -83,7 +86,7 @@
                                     <path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V4zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2H3z"></path>
                                 </svg></div>
                             <h5 class="fw-bold card-title">Participate in a decentralized survey&nbsp;</h5>
-                            <p class="text-muted card-text mb-4">You can earn rewards by participating in different surveys. Your information can be never accessed by a third party.&nbsp;</p><button class="btn btn-primary shadow" type="button">Get started</button>
+                            <p class="text-muted card-text mb-4">You can earn rewards by participating in different surveys. Your information can be never accessed by a third party.&nbsp;</p><button class="btn btn-primary shadow" type="button" data-bs-target="#participate-survey" data-bs-toggle="modal">Get started</button>
                         </div>
                     </div>
                 </div>
@@ -96,10 +99,64 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="create-survey-modal">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="color: rgb(8,8,8);">Create Your Survey</h4><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="color: rgb(6,5,5);">
+                    <p>Survey Name</p><input type="text">
+                    <p>Select the incentive method&nbsp;</p>
+                    <div class="form-check"><input class="form-check-input" type="radio" id="formCheck-2"><label class="form-check-label" for="formCheck-2">Lottery</label></div>
+                    <div class="form-check"><input class="form-check-input" type="radio" id="formCheck-1"><label class="form-check-label" for="formCheck-1">Even Payout</label></div>
+                    <p><br>Initial Deposit</p><input class="border rounded-pill" type="number" value="0" style="padding-left: 10px;">
+                    <p>Your questionnaire&nbsp;</p><textarea placeholder="Please enter your questionnaire here. Each new line line is a new question. Each option is follow by a &quot;;&quot; sign.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         For example:                                                                                                                                                                                                                                                                                                                                                                   What is your favorite color?;Red;Blue;Yellow                                                                                                                                                                                                                                             What is your favorite website to visit?;pintrest;github" rows="7" cols="70"></textarea>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Close</button><button class="btn btn-primary" type="button">Next</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" tabindex="-1" id="participate-survey">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="color: rgb(8,8,8);">Participate in Survey</h4><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Enter your health info to enter into weekly lottery&nbsp;</h4>
+                            <p>Have you experienced covid like symptoms in the past 14 days?</p>
+                            <div class="form-check"><input class="form-check-input" type="radio" id="formCheck-3"><label class="form-check-label" for="formCheck-3">Yes</label></div>
+                            <div class="form-check"><input class="form-check-input" type="radio" id="formCheck-4"><label class="form-check-label" for="formCheck-4">No&nbsp;</label></div>
+                            <p>Your Zip Code</p><input type="text">
+                        </div><button class="btn btn-primary" type="button" style="margin-right: 609px;margin-bottom: 8px;margin-left: 15px;">Submit</button>
+                    </div>
+                    <p>The content of your modal.</p>
+                    <div class="card">
+                        <div class="card-body" style="margin-bottom: 3px;">
+                            <h4 class="card-title">Survey Title 1</h4>
+                            <p class="card-text">Reward Pool: <span style="color: rgb(52, 193, 16);">100 CSK</span><br>Payout Type: <span style="color: rgb(218, 19, 19);">Even Payout</span><br><span style="color: rgb(247, 242, 242);">Total Participants: 10/100</span><br><br></p><a class="card-link" href="#">Participate in this survey</a>
+                        </div>
+                    </div>
+                    <p>Paragraph</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Survey Title 2</h4>
+                            <p class="card-text">Reward Pool: <span style="color: rgb(52, 193, 16);">100 CSK</span><br>Payout Type: <span style="color: rgb(117, 115, 238);">Lottery</span><br><span style="color: rgb(247, 242, 242);">Total Participants: 10/100</span><br><br></p><a class="card-link" href="#">Participate in this survey</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Close</button><button class="btn btn-primary" type="button">Next</button></div>
+            </div>
+        </div>
+    </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/bs-init.js"></script>
     <script src="assets/js/bold-and-dark.js"></script>
     <script src="assets/js/Sidebar-Menu.js"></script>
+     <script src="assets/js/survey.js"></script>
 </body>
 
 </html>
