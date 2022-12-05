@@ -36,17 +36,21 @@ contract CryptoSurvey is Ownable{
         cskToken = IERC20(tokenAddress);
     }
 
+
+    //get the number of surveys
     function getSurveyCount() public view returns (uint256) {
 
         return countSurveys;
     }
 
-
+    //get the survey by id
+    //ex: countSurveys=10 means there are ten surveys. the ids are 1,2,3,....10
     function getSurvey(uint256 id) external view returns (Survey memory){
 
         return _surveys[id];
     }
 
+    //create a new survey, id is countSurveys+1
     function createSurvey(string memory pName,bool pIsLotto, uint256 pReward) public returns (uint256){
         countSurveys++;
 
@@ -60,6 +64,7 @@ contract CryptoSurvey is Ownable{
         return countSurveys;
     }
 
+    //report to a servey
     function report2Survey(uint256 surveyId) public {
         address reporter = _msgSender();
         _surveys[surveyId].userCount++;
@@ -72,6 +77,7 @@ contract CryptoSurvey is Ownable{
        
     }
 
+    //the owner of this contract can end the survey and give the reward
     function claimReward(uint256 surveyId) public onlyOwner {
         if (_surveys[surveyId].isActive){
             if (_surveys[surveyId].isLotto){
@@ -98,6 +104,7 @@ contract CryptoSurvey is Ownable{
 
     }
 
+    //easy version of get random number
     function random(uint number) public view returns(uint) {
         return uint(keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
             msg.sender))) % number;
