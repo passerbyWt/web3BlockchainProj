@@ -16,7 +16,7 @@ contract CryptoSurvey is Ownable{
 
     // Variable to ensure users does not malicously signup many accounts
     uint256 public signUpRewardLockTime = 1 days;
-    uint256 public userSignUpCountLockLimit = 3;
+    uint256 public userSignUpCountLockLimit = 1000;
     uint256 public nextAccessTime;
     uint256 public userSignUpCountLockCount;
     uint256 public lastUserLimitTime;
@@ -152,7 +152,7 @@ contract CryptoSurvey is Ownable{
     }
 
     //the owner of this contract can end the survey and give the reward
-    function claimReward(uint256 surveyId) public onlyOwner {
+    function claimReward(uint256 surveyId) public onlyOwner{
         require(block.timestamp > _surveys[surveyId].surveyEndTime, "Survey has not ended");
 
         if (_surveys[surveyId].isActive){
