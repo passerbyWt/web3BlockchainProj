@@ -22,7 +22,7 @@ contract CryptoSurvey is Ownable{
     uint256 public lastUserLimitTime;
 
     event Deposit(address indexed from, uint256 indexed amount);
-    event Withdrawal(address indexed to, uint256 indexed amount);
+    event Withdraw(address indexed to, uint256 indexed amount);
 
     struct user {
         uint256 dataQualityScore;
@@ -34,6 +34,8 @@ contract CryptoSurvey is Ownable{
         bool isActive;
         uint256 reward;
         bool isLotto;
+        uint256 enteranceFee;
+        uint256 surveyEndTime;
         uint256 userCount;
     }
 
@@ -69,7 +71,7 @@ contract CryptoSurvey is Ownable{
         }
     }
 
-    function recieve() external payable{
+    receive() external payable {
         emit Deposit(msg.sender, msg.value);
     }
 
@@ -78,7 +80,7 @@ contract CryptoSurvey is Ownable{
     }
 
     function withdraw() external onlyOwner {
-        emit Withdrawal(msg.sender, cskToken.balanceOf(address(this)));
+        emit Withdraw(msg.sender, cskToken.balanceOf(address(this)));
         cskToken.transfer(msg.sender, cskToken.balanceOf(address(this)));
     }
 
@@ -105,7 +107,11 @@ contract CryptoSurvey is Ownable{
     }
 
     //create a new survey, id is countSurveys+1
-    function createSurvey(string memory pName,bool pIsLotto, uint256 pReward) public returns (uint256){
+    function createSurvey(string memory pName, 
+                        bool pIsLotto, 
+                        uint256 pReward, 
+                        uint256 surveyDuration, 
+                        uint256 enteranceFee) public returns (uint256){
         countSurveys++;
 
         _surveys[countSurveys] = Survey({
@@ -113,6 +119,8 @@ contract CryptoSurvey is Ownable{
             isActive: true,
             reward: pReward,
             isLotto: pIsLotto,
+            enteranceFee: enteranceFee,
+            surveyEndTime: block.timestamp + surveyDuration * 1 minutes,
             userCount:0
         });
         return countSurveys;
@@ -120,6 +128,7 @@ contract CryptoSurvey is Ownable{
 
     //report to a servey
     function report2Survey(uint256 surveyId) public {
+        require(_surveys[surveyId].enteranceFee <= 0, "There is an entrance fee for this survey");
         address reporter = _msgSender();
         _surveys[surveyId].userCount++;
         uint256 uId=_surveys[surveyId].userCount;
@@ -127,12 +136,25 @@ contract CryptoSurvey is Ownable{
 
 
         cskToken.safeIncreaseAllowance(reporter, _surveys[surveyId].reward);
+    }
 
-       
+    function report2SurveyWithEntranceFee(uint256 surveyId) public payable {
+        require(_surveys[surveyId].enteranceFee > 0, "There is no entrance fee for this survey");
+        require(msg.value > _surveys[surveyId].enteranceFee, "Enterence amount is lower than requested");
+        address reporter = _msgSender();
+        _surveys[surveyId].userCount++;
+        uint256 uId=_surveys[surveyId].userCount;
+        _users[surveyId][uId]=reporter;
+        _surveys[surveyId].reward+=_surveys[surveyId].enteranceFee;
+
+
+        cskToken.safeIncreaseAllowance(reporter, _surveys[surveyId].reward);
     }
 
     //the owner of this contract can end the survey and give the reward
     function claimReward(uint256 surveyId) public onlyOwner {
+        require(block.timestamp > _surveys[surveyId].surveyEndTime, "Survey has not ended");
+
         if (_surveys[surveyId].isActive){
             if (_surveys[surveyId].isLotto){
                 
@@ -153,9 +175,10 @@ contract CryptoSurvey is Ownable{
             }
             _surveys[surveyId].isActive=false;
         }
+    }
 
-
-
+    function destroy() public onlyOwner {
+        selfdestruct(payable(owner()));
     }
 
     //easy version of get random number
