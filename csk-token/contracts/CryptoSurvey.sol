@@ -10,7 +10,7 @@ contract CryptoSurvey is Ownable{
     using SafeERC20 for IERC20;
     IERC20 public cskToken;
     
-    uint256 public signUpReward = 10 * (10 * 18);
+    uint256 public signUpReward = 10 * (10 ** 18);
     mapping(address => user) userPool;
     uint256 public userSignUpCount;
 
@@ -50,7 +50,7 @@ contract CryptoSurvey is Ownable{
     }
 
     // 
-    function requestignUpReward() public {
+    function requestSignUpReward() public {
         require(msg.sender != address(0), "Address cannot be zero.");
         // require(cskToken.balanceOf(address(this)) >= signUpReward, "Insufficient token in CryptoSurvey contract");
         require(block.timestamp >  nextAccessTime, "Too many users signup.");
@@ -128,7 +128,8 @@ contract CryptoSurvey is Ownable{
 
     //report to a servey
     function report2Survey(uint256 surveyId) public {
-        require(_surveys[surveyId].enteranceFee <= 0, "There is an entrance fee for this survey");
+        require(_surveys[surveyId].enteranceFee <= cskToken.balanceOf(msg.sender), "There is an entrance fee for this survey");
+        require(block.timestamp <= _surveys[surveyId].surveyEndTime, "Survey has ended");
         address reporter = _msgSender();
         _surveys[surveyId].userCount++;
         uint256 uId=_surveys[surveyId].userCount;
@@ -138,18 +139,6 @@ contract CryptoSurvey is Ownable{
         cskToken.safeIncreaseAllowance(reporter, _surveys[surveyId].reward);
     }
 
-    function report2SurveyWithEntranceFee(uint256 surveyId) public payable {
-        require(_surveys[surveyId].enteranceFee > 0, "There is no entrance fee for this survey");
-        require(msg.value > _surveys[surveyId].enteranceFee, "Enterence amount is lower than requested");
-        address reporter = _msgSender();
-        _surveys[surveyId].userCount++;
-        uint256 uId=_surveys[surveyId].userCount;
-        _users[surveyId][uId]=reporter;
-        _surveys[surveyId].reward+=_surveys[surveyId].enteranceFee;
-
-
-        cskToken.safeIncreaseAllowance(reporter, _surveys[surveyId].reward);
-    }
 
     //the owner of this contract can end the survey and give the reward
     function claimReward(uint256 surveyId) public onlyOwner{
@@ -181,6 +170,7 @@ contract CryptoSurvey is Ownable{
         selfdestruct(payable(owner()));
     }
 
+    //TODO: using chainlink 
     //easy version of get random number
     function random(uint number) public view returns(uint) {
         return uint(keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
